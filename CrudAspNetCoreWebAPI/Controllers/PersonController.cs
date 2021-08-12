@@ -9,7 +9,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using FromBodyAttribute = Microsoft.AspNetCore.Mvc.FromBodyAttribute;
+using HttpDeleteAttribute = System.Web.Http.HttpDeleteAttribute;
 using HttpGetAttribute = Microsoft.AspNetCore.Mvc.HttpGetAttribute;
+using HttpPostAttribute = Microsoft.AspNetCore.Mvc.HttpPostAttribute;
+using HttpPutAttribute = Microsoft.AspNetCore.Mvc.HttpPutAttribute;
 using RouteAttribute = Microsoft.AspNetCore.Mvc.RouteAttribute;
 
 namespace CrudAspNetCoreWebAPI.Controllers
@@ -23,12 +26,7 @@ namespace CrudAspNetCoreWebAPI.Controllers
 
 
 
-    private readonly Person _customerRepository;
-
-    public PersonController(Person customerRepository)
-    {
-        _customerRepository = customerRepository;
-    }
+    
 
 
     //AllUser
@@ -68,7 +66,7 @@ namespace CrudAspNetCoreWebAPI.Controllers
         //post
 
 
-        [Microsoft.AspNetCore.Mvc.HttpPost]
+        [HttpPost]
 
         [Route("post")]
         
@@ -83,16 +81,36 @@ namespace CrudAspNetCoreWebAPI.Controllers
         //put
 
 
-        [Microsoft.AspNetCore.Mvc.HttpPut]
+        [HttpPut]
 
         [Route("put")]
 
-        
+        public IActionResult PutPerson([FromBody] Person p)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("error");
+
+          using(var x = new PersonDbContext())
+            {
+                var checkexistingPerson = x.Person.Where(c => c.Id == p.Id).FirstOrDefault<Person>();
+                if(checkexistingPerson != null)
+                {
+                    checkexistingPerson.FirstName = p.FirstName;
+                    x.SaveChanges();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            return Ok();
+        } 
+    
 
 
         //delete
 
-        [Microsoft.AspNetCore.Mvc.HttpDelete]
+        [HttpDelete]
 
         [Route("delete")]
 
